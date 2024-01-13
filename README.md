@@ -56,6 +56,7 @@ The source code for the XOP DEBUG function is:
   EE3A   0608           	DEC	R8
   EE3C   16FD           	JNE	XOP_LOOP
   EE3E   022D FFE0      	AI	R13,-32		RESTOR WORKSPACE REGISTER LOCATION
+				RTWP
 
 ```
 

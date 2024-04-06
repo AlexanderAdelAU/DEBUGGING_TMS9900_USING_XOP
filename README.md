@@ -1,5 +1,5 @@
 # Using TMS 9000 XOP Instruction to implement a Debugging Function
-You can use the XOP to implement a very simple but effective debugging function for use in your TMS 9900/99000 assembler code.
+Adding a software based debugging function to the TMS9900 is straight forward by using the XOP to implement a very simple but effective debugging function.
 
 You first define your XOP instruction using the familiar declaration:
 

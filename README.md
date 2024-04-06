@@ -54,11 +54,7 @@ R8 =E018 R9 =161A R10=C0DE R11=0102 R12=0243 R13=00FF R14=0204 R15=0500
 
 The source code for the XOP DEBUG function is:
 
-```
-                        ;=================================================
-                        
-                        ;
-                        ;
+```                     ;
                         ;************************************************
                         ;	DEBUG AND TRACING INFORMATION
                         ;

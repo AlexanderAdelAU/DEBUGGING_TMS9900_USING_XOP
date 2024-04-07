@@ -12,49 +12,64 @@ A sample test programme that demonstrates how to use it.   The following is a si
 with the DEBUG XOP inserted into your code.
 
 ```
-	 
+                       ;
                         ;
                         ;---perform simple tests
                         ;
                         ;
-  0102   02E0 0136      TEST1:	LWPI	WORKSP
-  0106   0200 7FFF      	LI	R0,7FFFH
-  010A   0201 0002      	LI	R1,2
-  010E   A040           	A	R0,R1
-  0110   2FE0 0124      	DEBUG	@ADDTEST
-  0114   2DA0 011C      	CALL	@TEST2
-  0118   0420 E000      	BLWP	@MONITOR
+  0102   02E0 0140      TEST1:	LWPI	WORKSP
+U 0106   0200 0000      	LI	SP,STACKP
+  010A   0201 E5E5      	LI	R1,0E5E5H
+  010E   2E01           	PUSH	R1
+  0110   0200 7FFF      	LI	R0,7FFFH
+  0114   0201 0002      	LI	R1,2
+  0118   A040           	A	R0,R1
+  011A   2FE0 012E      	DEBUG	@ADDTEST
+  011E   2DA0 0126      	CALL	@TEST2
+  0122   0420 E000      	BLWP	@MONITOR
                         
-  011C   0A11           TEST2:	SLA	R1,1
-  011E   2FE0 012D      	DEBUG	@SLATEST
-  0122   2DC0           	RET
+  0126   0A11           TEST2:	SLA	R1,1
+  0128   2FE0 0137      	DEBUG	@SLATEST
+  012C   2DC0           	RET
                         ;
                         ; NAMES OF THE ROUTINES BEING DEBUGGED
                         ;
-  0124   5445 5354      ADDTEST:	TEXT	"TEST1-ADD"
-  0128   312D 4144      
-  012C   44             
-  012D   5445 5354      SLATEST:	TEXT	"TEST2-SLA"
-  0131   322D 534C      
-  0135   41                     
+  012E   5445 5354      ADDTEST:	TEXT	"TEST1-ADD"
+  0132   312D 4144      
+  0136   44             
+  0137   5445 5354      SLATEST:	TEXT	"TEST2-SLA"
+  013B   322D 534C      
+  013F   41             
+                        ;
+                        ;--BUFFERS ETC
+                        ;
+  0140                  	EVEN
+  0140                  WORKSP	BSS	32
+  0160                  STACKL	BSS	32
+  017E                  STACKP	EQU	$-2
+                   
 
 ```
 
 and the code in DEBUG(XOP) will produce, during execution, something such as this:
 
 ```
-TEST1-AD PC = 0114 ST = 8807 1000100000000111
-R0 =7FFF R1 =8001 R2 =C020 R3 =0104 R4 =1303 R5 =0C0B R6 =0003 R7 =2DA0
-R8 =E018 R9 =161A R10=C0E0 R11=0102 R12=0243 R13=00FF R14=0204 R15=0500
+TEST1-AD *SP=E5E5 PC = 011E ST = 8807 1000100000000111
+R0 =7FFF R1 =8001 R2 =C404 R3 =A031 R4 =A030 R5 =6118 R6 =610A R7 =820C
+R8 =1867 R9 =7033 R10=067F R11=5504 R12=8823 R13=2405 R14=AF65 R15=A432
 
-TEST2-SL PC = 0122 ST = D807 1101100000000111
-R0 =7FFF R1 =0002 R2 =C020 R3 =0104 R4 =1303 R5 =0C0B R6 =0003 R7 =2DA0
-R8 =E018 R9 =161A R10=C0DE R11=0102 R12=0243 R13=00FF R14=0204 R15=0500
+TEST2-SL *SP=0122 PC = 012C ST = D807 1101100000000111
+R0 =7FFF R1 =0002 R2 =C404 R3 =A031 R4 =A030 R5 =6118 R6 =610A R7 =820C
+R8 =1867 R9 =7033 R10=067D R11=5504 R12=8823 R13=2405 R14=AF65 R15=A432
 ```
 
 The source code for the XOP DEBUG function is:
 
-```                     ;
+```
+                        ;=================================================
+                        
+                        ;
+                        ;
                         ;************************************************
                         ;	DEBUG AND TRACING INFORMATION
                         ;
@@ -66,82 +81,87 @@ The source code for the XOP DEBUG function is:
                         ;
                         ;*************************************************
                         ;
-  E778   0208 0008      XOP15:	LI	R8,8		;KEEP NAMES TO 8 BYTES
-  E77C   0209 DED0      	LI	R9,DEBUG_NAME
-  E780   DE7B           XOP15_NAME:	MOVB	*R11+,*R9+		;SAVE THE NAME
-  E782   1305           	JEQ	XOP15_MAIN
-  E784   0608           	DEC	R8
-  E786   16FC           	JNE	XOP15_NAME
-  E788   0208 0000      	LI	R8,0;		;NULL TERMINATE
-  E78C   D648           	MOVB	R8,*R9
+  E774   0208 0008      XOP15:	LI	R8,8		;KEEP NAMES TO 8 BYTES
+  E778   0209 DED0      	LI	R9,DEBUG_NAME
+  E77C   DE7B           XOP15_NAME:	MOVB	*R11+,*R9+		;SAVE THE NAME
+  E77E   1305           	JEQ	XOP15_MAIN
+  E780   0608           	DEC	R8
+  E782   16FC           	JNE	XOP15_NAME
+  E784   0208 0000      	LI	R8,0;		;NULL TERMINATE
+  E788   D648           	MOVB	R8,*R9
                         
                         ;
                         ; 	NOW SAVE THE TRACE DATA
                         ;
-  E78E   020B DEDA      XOP15_MAIN:	LI	R11, DEBUG_BUFFER
-  E792   CECE           	MOV	R14,*R11+		;STORE NEXT STATEMENT PROGRAMME COUNTER
-  E794   CECF           	MOV	R15,*R11+		;STORE STATUS
-  E796   0208 0010      	LI	R8,16		;16 REGISTERS
+  E78A   020B DEDA      XOP15_MAIN:	LI	R11, DEBUG_BUFFER
+  E78E   CECE           	MOV	R14,*R11+		;STORE NEXT STATEMENT PROGRAMME COUNTER
+  E790   CECF           	MOV	R15,*R11+		;STORE STATUS
+  E792   0208 0010      	LI	R8,16		;16 REGISTERS
                         XOP15_REGS:
-  E79A   CEFD           	MOV 	*R13+,*R11+		;COPY REGISTERS
-  E79C   0608           	DEC	R8
-  E79E   16FD           	JNE	XOP15_REGS
-  E7A0   022D FFE0      	AI	R13,-32		;RESTOR WORKSPACE REGISTER LOCATION
-  E7A4   1000           	JMP	LIST_REG
+  E796   CEFD           	MOV 	*R13+,*R11+		;COPY REGISTERS
+  E798   0608           	DEC	R8
+  E79A   16FD           	JNE	XOP15_REGS
+  E79C   022D FFE0      	AI	R13,-32		;RESTOR WORKSPACE REGISTER LOCATION
+  E7A0   1000           	JMP	LIST_REG
                         ;
                         ;
                         ; PRINT OUT DEBUGGING/TRACE PC, STATUS AND REGISTERS
                         ;
-  E7A6   0209 DEDA      LIST_REG:	LI	R9,DEBUG_BUFFER
-  E7AA   0208 0010      	LI	R8,16
-  E7AE   2FA0 E038       	MESG	@CRLF		;PRINT INDENTATION
-  E7B2   2FA0 DED0       	MESG	@DEBUG_NAME		;PRINT THE NAME OF THE MODULE
-  E7B6   2FA0 E824      	MESG	@PC_REG		;PRINT " PC="
-  E7BA   2EB9           	WHEX	*R9+
-  E7BC   2FA0 E81D      	MESG	@ST_REG		;PRINT " ST="
-  E7C0   C2F9           	MOV	*R9+,R11		;GET STATUS REGISTER VALUE
-  E7C2   2E8B           	WHEX	R11
-  E7C4   020A 2000      	LI	R10,' '*256		;PRINT SPACE
-  E7C8   2F0A           	WRITE	R10
-  E7CA   020A 3000      LIST_REGA:	LI	R10,30H*256		;PRINT 0
-  E7CE   0A1B           	SLA	R11,1
-  E7D0   1802           	JOC	LIST_REGB
-  E7D2   2F0A           	WRITE	R10
-  E7D4   1003           	JMP	LIST_REGC
-  E7D6   022A 0100      LIST_REGB:	AI	R10,1*256		;PRINT 1
-  E7DA   2F0A           	WRITE	R10
-  E7DC   0608           LIST_REGC:	DEC	R8
-  E7DE   16F5           	JNE	LIST_REGA
-  E7E0   04CA           	CLR	R10
-  E7E2   2FA0 E038      LIST_REG1:	MESG	@CRLF		;PRINT CR,LF
-  E7E6   0208 5200      LIST_REG2:	LI	R8,'R'*256
-  E7EA   2F08           	WRITE	R8		;PRINT "R"
-  E7EC   2F2A E078      	WRITE	@NUMTAB(R10)	;PRINT REGISTER NO
-  E7F0   2F2A E079      	WRITE	@NUMTAB+1(R10)	;PRINT REGISTER NO
-  E7F4   0208 3D00      	LI	R8,'='*256
-  E7F8   2F08           	WRITE	R8
-  E7FA   2EB9           	WHEX	*R9+		;PRINT REGISTER CONTENTS
-  E7FC   05CA           	INCT	R10
-  E7FE   028A 0020      	CI	R10,20H
-  E802   1307           	JEQ	LIST_EXIT
-  E804   0208 2000      	LI	R8,' '*256		;PRINT A SPACE
-  E808   2F08           	WRITE	R8
-  E80A   26A0 E0D4      	CZC	@MASK15,R10
-  E80E   13E9           	JEQ	LIST_REG1
-  E810   10EA           	JMP	LIST_REG2
-  E812   2FA0 E038      LIST_EXIT:	MESG	@CRLF		;PRINT INDENTATION
-  E816   0380           	RTWP
+  E7A2   0209 DEDA      LIST_REG:	LI	R9,DEBUG_BUFFER
+  E7A6   0208 0010      	LI	R8,16
+  E7AA   2FA0 E038       	MESG	@CRLF		;PRINT INDENTATION
+  E7AE   2FA0 DED0       	MESG	@DEBUG_NAME		;PRINT THE NAME OF THE MODULE
+  E7B2   2FA0 E831       	MESG	@SP_REG
+  E7B6   C2AD 0014       	MOV	@2*SP(R13),R10	;GET STACK POINTER
+  E7BA   2E9A            	WHEX	*R10		;PRINT CONTENTS
+  E7BC   2FA0 E82A      	MESG	@PC_REG		;PRINT " PC="
+  E7C0   2EB9           	WHEX	*R9+
+  E7C2   2FA0 E823      	MESG	@ST_REG		;PRINT " ST="
+  E7C6   C2F9           	MOV	*R9+,R11		;GET STATUS REGISTER VALUE
+  E7C8   2E8B           	WHEX	R11
+  E7CA   020A 2000      	LI	R10,' '*256		;PRINT SPACE
+  E7CE   2F0A           	WRITE	R10
+  E7D0   020A 3000      LIST_REGA:	LI	R10,30H*256		;PRINT 0
+  E7D4   0A1B           	SLA	R11,1
+  E7D6   1802           	JOC	LIST_REGB
+  E7D8   2F0A           	WRITE	R10
+  E7DA   1003           	JMP	LIST_REGC
+  E7DC   022A 0100      LIST_REGB:	AI	R10,1*256		;PRINT 1
+  E7E0   2F0A           	WRITE	R10
+  E7E2   0608           LIST_REGC:	DEC	R8
+  E7E4   16F5           	JNE	LIST_REGA
+  E7E6   04CA           	CLR	R10
+  E7E8   2FA0 E038      LIST_REG1:	MESG	@CRLF		;PRINT CR,LF
+  E7EC   0208 5200      LIST_REG2:	LI	R8,'R'*256
+  E7F0   2F08           	WRITE	R8		;PRINT "R"
+  E7F2   2F2A E078      	WRITE	@NUMTAB(R10)	;PRINT REGISTER NO
+  E7F6   2F2A E079      	WRITE	@NUMTAB+1(R10)	;PRINT REGISTER NO
+  E7FA   0208 3D00      	LI	R8,'='*256
+  E7FE   2F08           	WRITE	R8
+  E800   2EB9           	WHEX	*R9+		;PRINT REGISTER CONTENTS
+  E802   05CA           	INCT	R10
+  E804   028A 0020      	CI	R10,20H
+  E808   1307           	JEQ	LIST_EXIT
+  E80A   0208 2000      	LI	R8,' '*256		;PRINT A SPACE
+  E80E   2F08           	WRITE	R8
+  E810   26A0 E0D4      	CZC	@MASK15,R10
+  E814   13E9           	JEQ	LIST_REG1
+  E816   10EA           	JMP	LIST_REG2
+  E818   2FA0 E038      LIST_EXIT:	MESG	@CRLF		;PRINT INDENTATION
+  E81C   0380           	RTWP
                         
-  E818   2057 503D      WP_REG:	TEXT	' WP='
-  E81C   00             	BYTE	0
-  E81D   2053 5420      ST_REG:	TEXT	' ST = '
-  E821   3D20           
-  E823   00             	BYTE	0
-  E824   2050 4320      PC_REG:	TEXT	' PC = '
-  E828   3D20           
-  E82A   00             	BYTE	0
-
-
+  E81E   2057 503D      WP_REG:	TEXT	' WP='
+  E822   00             	BYTE	0
+  E823   2053 5420      ST_REG:	TEXT	' ST = '
+  E827   3D20           
+  E829   00             	BYTE	0
+  E82A   2050 4320      PC_REG:	TEXT	' PC = '
+  E82E   3D20           
+  E830   00             	BYTE	0
+  E831   202A 5350      SP_REG:	TEXT	' *SP='
+  E835   3D             
+  E836   00             	BYTE	0
+  E837   00             	EVEN
                         ;
                         ;	NOTE THIS IS USED BY DEBUG TO STORE MULTIPLE DEBUG POINTERS TO
                         ;	PROGRAMMES CALLING DEBUG

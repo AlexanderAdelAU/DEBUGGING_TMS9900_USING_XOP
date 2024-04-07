@@ -11,44 +11,44 @@ Which declares that we are using XOP 15 and DEBUG is its name to declare in the 
 A sample test programme that demonstrates how to use it.   The following is a simple set of instructions
 with the DEBUG XOP inserted into your code.
 
-```
-                       ;
+```                        ;
                         ;
                         ;---perform simple tests
                         ;
                         ;
-  0102   02E0 0140      TEST1:	LWPI	WORKSP
+  0102   02E0 0142      TEST1:	LWPI	WORKSP
 U 0106   0200 0000      	LI	SP,STACKP
   010A   0201 E5E5      	LI	R1,0E5E5H
   010E   2E01           	PUSH	R1
   0110   0200 7FFF      	LI	R0,7FFFH
   0114   0201 0002      	LI	R1,2
   0118   A040           	A	R0,R1
-  011A   2FE0 012E      	DEBUG	@ADDTEST
-  011E   2DA0 0126      	CALL	@TEST2
-  0122   0420 E000      	BLWP	@MONITOR
+  011A   2FE0 0130      	DEBUG	@ADDTEST
+  011E   2DA0 0128      	CALL	@TEST2
+  0122   2E43           	POP	R3
+  0124   0420 E000      	BLWP	@MONITOR
                         
-  0126   0A11           TEST2:	SLA	R1,1
-  0128   2FE0 0137      	DEBUG	@SLATEST
-  012C   2DC0           	RET
+  0128   0A11           TEST2:	SLA	R1,1
+  012A   2FE0 0139      	DEBUG	@SLATEST
+  012E   2DC0           	RET
                         ;
                         ; NAMES OF THE ROUTINES BEING DEBUGGED
                         ;
-  012E   5445 5354      ADDTEST:	TEXT	"TEST1-ADD"
-  0132   312D 4144      
-  0136   44             
-  0137   5445 5354      SLATEST:	TEXT	"TEST2-SLA"
-  013B   322D 534C      
-  013F   41             
+  0130   5445 5354      ADDTEST:	TEXT	"TEST1-ADD"
+  0134   312D 4144      
+  0138   44             
+  0139   5445 5354      SLATEST:	TEXT	"TEST2-SLA"
+  013D   322D 534C      
+  0141   41             
                         ;
                         ;--BUFFERS ETC
                         ;
-  0140                  	EVEN
-  0140                  WORKSP	BSS	32
-  0160                  STACKL	BSS	32
-  017E                  STACKP	EQU	$-2
-                   
-
+  0142                  	EVEN
+  0142                  WORKSP	BSS	32
+  0162                  STACKL	BSS	32
+  0180                  STACKP	EQU	$-2                               
+                        ;
+  0182                  	END
 ```
 
 and the code in DEBUG(XOP) will produce, during execution, something such as this:

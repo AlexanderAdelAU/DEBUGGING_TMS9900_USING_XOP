@@ -11,7 +11,7 @@ Which declares that we are using XOP 15 and DEBUG is its name to declare in the 
 A sample test programme that demonstrates how to use it.   The following is a simple set of instructions
 with the DEBUG XOP inserted into your code.
 
-```                        ;
+```                     ;
                         ;
                         ;---perform simple tests
                         ;
@@ -66,10 +66,6 @@ R8 =1867 R9 =7033 R10=067D R11=5504 R12=8823 R13=2405 R14=AF65 R15=A432
 The source code for the XOP DEBUG function is:
 
 ```
-                        ;=================================================
-                        
-                        ;
-                        ;
                         ;************************************************
                         ;	DEBUG AND TRACING INFORMATION
                         ;

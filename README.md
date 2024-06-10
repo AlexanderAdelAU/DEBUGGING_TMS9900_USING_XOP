@@ -1,5 +1,5 @@
 # Using TMS 9000 XOP Instruction to implement a Debugging Function
-Adding a software based debugging function to the TMS9900 is straight forward by using the XOP to implement a very simple but effective debugging function.  A screen shot of debugging an operation is shown here.
+Debugging TMS9900 code can be easily implemented using the XOP, which allows context changing to preserve the state of the software being debugged.  By using the XOP to implement a very simple but effective debugging function.  A screen shot of debugging an operation is shown here.
 
 ![Image Alt Text](images/debug.png)
 
